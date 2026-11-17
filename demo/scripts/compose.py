@@ -1,5 +1,5 @@
-"""Compone el video siguiendo skill-video: portada, steps con panel y checklist,
-tarjeta con la grabación, zoom suave, cortes con fundido de 0,35 s y cierre."""
+"""Composes the video following skill-video: cover, steps with side panel and checklist,
+recording card, smooth zoom, 0.35 s crossfade cuts and closing card."""
 import subprocess, math, json, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -16,15 +16,10 @@ def F(w, s):
 
 BRAND = np.array([79, 70, 229], float)
 
-# ---------- fondo ----------
+# ---------- background (solid brand color + dot pattern) ----------
 def make_bg():
-    yy, xx = np.mgrid[0:H, 0:W].astype(float)
-    light = np.minimum(BRAND * 1.28 + 18, 255)
-    dark = BRAND * 0.55
-    d = np.sqrt(((xx - 1650) / W) ** 2 + ((yy - 120) / H) ** 2) / 1.15
-    d = np.clip(d, 0, 1)[..., None]
-    col = np.where(d < 0.45, light + (BRAND - light) * (d / 0.45), BRAND + (dark - BRAND) * ((d - 0.45) / 0.55))
-    im = Image.fromarray(col.clip(0, 255).astype(np.uint8)).convert("RGBA")
+    # solid brand color, no gradient
+    im = Image.new("RGBA", (W, H), tuple(int(c) for c in BRAND) + (255,))
     dots = Image.new("RGBA", (W, H), (0, 0, 0, 0)); dd = ImageDraw.Draw(dots)
     for y in range(24, H, 48):
         for x in range(24, W, 48):
@@ -33,8 +28,10 @@ def make_bg():
 
 BG = make_bg()
 
+CREDIT_TEXT = "Made by @mauribeza  ·  github.com/mauribeza"
+
 def ease(u): u = max(0.0, min(1.0, u)); return u * u * (3 - 2 * u)
-def ease_io(u):  # curva suave (cubic in-out)
+def ease_io(u):  # smooth curve (cubic in-out)
     u = max(0.0, min(1.0, u)); return 4 * u ** 3 if u < .5 else 1 - (-2 * u + 2) ** 3 / 2
 def back(u):
     u = max(0.0, min(1.0, u)); c1 = 1.70158; c3 = c1 + 1
@@ -88,7 +85,9 @@ def wrap(txt, font, width):
         else: lines.append(cur); cur = w
     lines.append(cur); return lines
 
-# ---------- portada / cierre ----------
+CREDIT = text_img(CREDIT_TEXT, F(500, 20), fill=(255, 255, 255, 190))
+
+# ---------- cover / closing ----------
 def title_card(kind, out, dur):
     if kind == "cover":
         p, t1, t2, sub = "TUTORIAL", "Getting", "Started", "Create, track and filter tasks in Taskflow"
@@ -99,7 +98,7 @@ def title_card(kind, out, dur):
     title = layer((a.width + b.width, a.height)); title.alpha_composite(a, (0, 0)); title.alpha_composite(b, (a.width, 0))
     line = layer((90, 4)); ImageDraw.Draw(line).rounded_rectangle((0, 0, 89, 3), 2, fill=(255, 255, 255, 220))
     st = text_img(sub, F(400, 30), fill=(255, 255, 255, 220))
-    els = [(lg, 300), (pl, 400), (title, 458), (line, 630), (st, 664)]
+    els = [(lg, 300), (pl, 400), (title, 458), (line, 630), (st, 664), (CREDIT, 990)]
     enc = encoder(out)
     n = int(round(dur * FPS))
     for i in range(n):
@@ -126,6 +125,7 @@ def card_base():
     sh = sh.filter(ImageFilter.GaussianBlur(26))
     base.alpha_composite(sh)
     ImageDraw.Draw(base).rounded_rectangle((CX, CY, CX + CARD_W, CY + CARD_H), 22, fill="white")
+    base.alpha_composite(CREDIT, (72, H - 72 - CREDIT.height // 2))
     return base
 
 CARD_BASE = card_base()
@@ -203,7 +203,7 @@ def region(cx, cy, w):
     return (x0, y0, w, h)
 
 def zoom_at(t, keys):
-    """keys: lista de (t0, t1, reg_desde, reg_hasta); fuera de los tramos se mantiene."""
+    """keys: list of (t0, t1, region_from, region_to); the region is held outside those ranges."""
     r = keys[0][2] if keys else FULL
     for t0, t1, a, b in keys:
         if t >= t1: r = b
@@ -226,7 +226,7 @@ def render_step(cfg, out):
     for i in range(int(round(dur * FPS))):
         t = i / FPS
         fr = CARD_BASE.copy()
-        # panel con entrada escalonada
+        # panel with staggered entrance
         if t < 1.6:
             for k, (im, x, y) in enumerate(els):
                 u = ease((t - 0.1 - k * 0.07) / 0.45)
@@ -238,7 +238,7 @@ def render_step(cfg, out):
             fr.alpha_composite(static)
         for y, tc in zip(rows, cfg["checks"]):
             if t >= tc: draw_check(fr, y, (t - tc) / 0.45)
-        # grabación
+        # recording
         reg = zoom_at(t, cfg.get("zoom", []))
         frames = []
         for k, (a, b, fade) in enumerate(segs):

@@ -34,7 +34,7 @@ Antes de diseñar, confirma con el usuario estos datos. Si falta algún dato de 
 
 ## 2. Diseño (1920×1080, 30 fps, H.264 yuv420p)
 
-- **Fondo:** degradado radial del color principal de la marca (una versión un poco más clara arriba a la derecha y una más oscura en los bordes), con una trama de puntos blancos sutiles (opacidad ~0.16, cada 48 px). Usa la fuente de la marca.
+- **Fondo:** color principal de la marca, sólido y sin degradado, con una trama de puntos blancos sutiles (opacidad ~0.16, cada 48 px). Usa la fuente de la marca.
 - **Contraste:** si el color principal es muy claro, usa texto oscuro en lugar de blanco.
 - **Portada (3 s):** logo en blanco o monocromo, pastilla con borde (p. ej. "TUTORIAL" o "PRODUCT UPDATE"), título grande con la primera palabra en negrita (800) y la segunda en fina (200), una línea y un subtítulo. Los elementos entran escalonados y en los últimos 0,6 s el texto sube y se desvanece, dejando solo el fondo.
 - **Cada step:** panel izquierdo (x = 72 px, ancho 480 px) con:

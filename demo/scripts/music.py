@@ -1,5 +1,5 @@
-"""Música original instrumental (numpy/scipy): pads, arpegio, bajo, percusión
-sutil y reverb, ~90 BPM, progresión optimista I–V–vi–IV en Do mayor."""
+"""Original instrumental music (numpy/scipy): pads, arpeggio, bass, subtle
+percussion and reverb, ~90 BPM, upbeat I–V–vi–IV progression in C major."""
 import subprocess, numpy as np, soundfile as sf
 from scipy.signal import fftconvolve, butter, lfilter
 
@@ -34,19 +34,19 @@ for b in range(nbars):
             f = hz(m) * 2 ** (det / 12)
             pad += np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(4 * np.pi * f * tt)
     add(pad * env(n, 0.9, 1.0) * 0.035, st)
-    # bajo suave
+    # soft bass
     for k in (0, 2):
         n2 = int(beat * 2 * SR); tt2 = np.arange(n2) / SR
         f = hz(BASS[b % 4])
         add((np.sin(2 * np.pi * f * tt2) + 0.2 * np.sin(4 * np.pi * f * tt2)) * env(n2, 0.02, 0.4) * 0.16, st + k * beat)
-    # arpegio ligero (corcheas)
+    # light arpeggio (eighth notes)
     arp = [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[3] + 12, ch[2] + 12, ch[1] + 12, ch[2] + 12, ch[3] + 12]
     for k, m in enumerate(arp):
         n3 = int(0.6 * SR); tt3 = np.arange(n3) / SR
         f = hz(m)
         tone = (np.sin(2 * np.pi * f * tt3) + 0.25 * np.sin(6 * np.pi * f * tt3)) * np.exp(-tt3 * 7)
         add(tone * 0.05, st + k * beat / 2, pan=0.35 if k % 2 else -0.35)
-    # percusión sutil
+    # subtle percussion
     for k in range(4):
         n4 = int(0.25 * SR); tt4 = np.arange(n4) / SR
         kick = np.sin(2 * np.pi * (55 + 70 * np.exp(-tt4 * 30)) * tt4) * np.exp(-tt4 * 18)
@@ -58,7 +58,7 @@ for b in range(nbars):
             n5 = int(0.18 * SR); sn = rng.standard_normal(n5) * np.exp(-np.arange(n5) / SR * 25)
             bb, aa = butter(2, [900 / (SR / 2), 5000 / (SR / 2)], "band"); add(lfilter(bb, aa, sn) * 0.05, st + k * beat)
 
-# reverb (respuesta al impulso sintética)
+# reverb (synthetic impulse response)
 ir_n = int(2.2 * SR); ir_t = np.arange(ir_n) / SR
 wet = np.zeros_like(out)
 for c in range(2):

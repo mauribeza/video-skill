@@ -1,6 +1,6 @@
-"""Genera una grabación de pantalla sintética de una app ficticia ("Taskflow")
-para probar skill-video. Incluye a propósito: tiempo muerto, una carga con
-spinner, un toast de error, una navegación innecesaria y un salto de minutos."""
+"""Generates a synthetic screen recording of a fictional app ("Taskflow") to test
+skill-video. It deliberately includes dead time, a loading spinner, an error
+toast, an unnecessary detour and a jump of several minutes."""
 import subprocess, math, os
 from PIL import Image, ImageDraw, ImageFont
 
@@ -50,7 +50,7 @@ def draw_card(d, x, y, cid, sub=None, done=False, hl=0.0):
         d.ellipse((x + CW - 38, y + 12, x + CW - 14, y + 36), fill=(22, 163, 74))
         d.line((x + CW - 32, y + 24, x + CW - 27, y + 29, x + CW - 19, y + 19), fill="white", width=3)
     d.text((x + 16, y + 44), title, font=F(600, 16), fill=(15, 23, 42))
-    # fila inferior
+    # bottom row
     d.rounded_rectangle((x + 16, y + 80, x + 28, y + 92), 2, outline=(148, 163, 184), width=2)
     d.text((x + 34, y + 78), due, font=F(500, 13), fill=(100, 116, 139))
     if st:
@@ -338,8 +338,8 @@ def part2(out):
     ex, ey = card_pos(2, 0)
     p.move(3.0, 4.8, (ex + 170, ey + 50))
     p.move(5.2, 6.4, (ex + 200, ey + 330))
-    p.move(7.0, 7.7, (110, 196 + 10))            # desvío a Reports
-    p.move(10.2, 10.9, (110, 96 + 10))           # vuelve a Board
+    p.move(7.0, 7.7, (110, 196 + 10))            # detour to Reports
+    p.move(10.2, 10.9, (110, 96 + 10))           # back to Board
     p.move(11.4, 12.5, BTN_FILTER)
     p.move(13.0, 13.8, (1080, 167))
     p.move(14.6, 16.0, (card_pos(1, 0, True)[0] + 200, card_pos(1, 0, True)[1] + 60))

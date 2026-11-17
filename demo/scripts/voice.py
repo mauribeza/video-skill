@@ -1,4 +1,4 @@
-"""Voz en off con Kokoro (af_heart, en-us, speed 1.0), sincronizada por step."""
+"""Kokoro voice-over (af_heart, en-us, speed 1.0), synced per step."""
 import json, subprocess, numpy as np, soundfile as sf
 from kokoro_onnx import Kokoro
 
@@ -28,11 +28,11 @@ for step, off, txt in SCRIPT:
     t0 = STEP_START[step] + off; t1 = t0 + len(s) / sr
     lim = STEP_END[step] if STEP_END[step] is not None else dur
     flag = "OK"
-    if t0 < prev_end: flag = "PISA LA ANTERIOR"; ok = False
-    if t1 > lim: flag = f"SE PASA DEL STEP ({lim:.2f})"; ok = False
+    if t0 < prev_end: flag = "OVERLAPS PREVIOUS"; ok = False
+    if t1 > lim: flag = f"RUNS PAST STEP ({lim:.2f})"; ok = False
     rows.append(f"{step:5} {t0:6.2f}-{t1:6.2f}  {flag:10} {txt}")
     i = int(t0 * SR); track[i:i + len(s)] += s
     prev_end = t1
 track = track[:int(dur * SR)]
 sf.write("build/voice.wav", track, SR)
-print("\n".join(rows)); print("video", dur, "todo OK" if ok else "HAY PROBLEMAS")
+print("\n".join(rows)); print("video", dur, "all OK" if ok else "PROBLEMS FOUND")
